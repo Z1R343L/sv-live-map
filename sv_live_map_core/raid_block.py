@@ -59,40 +59,46 @@ def calc_difficulty(story_progress: StoryProgress, difficulty_rand: int) -> Star
     """Calculate raid difficulty from story progress and difficulty rand"""
     match story_progress:
         case StoryProgress.DEFAULT:
-            if difficulty_rand <= 80:
-                return StarLevel.ONE_STAR
-            # elif (difficulty_rand - 80) <= 20
-            return StarLevel.TWO_STAR
+            return (
+                StarLevel.ONE_STAR
+                if difficulty_rand <= 80
+                else StarLevel.TWO_STAR
+            )
         case StoryProgress.THREE_STAR_UNLOCKED:
             if difficulty_rand <= 30:
                 return StarLevel.ONE_STAR
-            if difficulty_rand <= 70: # elif (difficulty_rand - 30) <= 40
-                return StarLevel.TWO_STAR
-            # elif (difficulty_rand - 30 - 40) <= 30
-            return StarLevel.THREE_STAR
+            return (
+                StarLevel.TWO_STAR
+                if difficulty_rand <= 70
+                else StarLevel.THREE_STAR
+            )
         case StoryProgress.FOUR_STAR_UNLOCKED:
             if difficulty_rand <= 20:
                 return StarLevel.ONE_STAR
-            if difficulty_rand <= 40: # elif (difficulty_rand - 20) <= 20
+            if difficulty_rand <= 40:  # elif (difficulty_rand - 20) <= 20
                 return StarLevel.TWO_STAR
-            if difficulty_rand <= 70: # elif (difficulty_rand - 20 - 20) <= 30
-                return StarLevel.THREE_STAR
-            # elif (difficulty_rand - 20 - 20 - 30) <= 30
-            return StarLevel.FOUR_STAR
+            return (
+                StarLevel.THREE_STAR
+                if difficulty_rand <= 70
+                else StarLevel.FOUR_STAR
+            )
         case StoryProgress.FIVE_STAR_UNLOCKED:
             if difficulty_rand <= 40:
                 return StarLevel.THREE_STAR
-            if difficulty_rand <= 75: # elif (difficulty_rand - 40) <= 35
-                return StarLevel.FOUR_STAR
-            # elif (difficulty_rand - 40 - 35) <= 25
-            return StarLevel.FIVE_STAR
+            return (
+                StarLevel.FOUR_STAR
+                if difficulty_rand <= 75
+                else StarLevel.FIVE_STAR
+            )
         case StoryProgress.SIX_STAR_UNLOCKED:
             if difficulty_rand <= 30:
                 return StarLevel.THREE_STAR
-            if difficulty_rand <= 70: # elif (difficulty_rand - 30) <= 40
-                return StarLevel.FOUR_STAR
-            # elif (difficulty_rand - 30 - 40) <= 30
-            return StarLevel.FIVE_STAR
+            return (
+                StarLevel.FOUR_STAR
+                if difficulty_rand <= 70
+                else StarLevel.FIVE_STAR
+            )
+
     return None
 
 @dataclass
@@ -143,7 +149,7 @@ class TeraRaid:
         if self.raid_enemy_info.difficulty:
             self.difficulty = self.raid_enemy_info.difficulty
         if self.raid_enemy_info.boss_poke_para.gem_type \
-          and self.raid_enemy_info.boss_poke_para.gem_type >= TeraTypeGeneration.NORMAL:
+              and self.raid_enemy_info.boss_poke_para.gem_type >= TeraTypeGeneration.NORMAL:
             self.tera_type = TeraType.from_generation(self.raid_enemy_info.boss_poke_para.gem_type)
         self.species = raid_enemy_info.boss_poke_para.dev_id
         self.form = raid_enemy_info.boss_poke_para.form_id
@@ -159,7 +165,7 @@ class TeraRaid:
                 self.ivs = tuple(rng.rand(32) for _ in range(6))
             case IVGeneration.SET_GUARANTEED_IVS:
                 temp_ivs = [-1 for _ in range(6)]
-                for i in range(raid_enemy_info.boss_poke_para.talent_vnum or 0):
+                for _ in range(raid_enemy_info.boss_poke_para.talent_vnum or 0):
                     index = rng.rand(6)
                     while temp_ivs[index] != -1:
                         index = rng.rand(6)
@@ -175,7 +181,7 @@ class TeraRaid:
                     raid_enemy_info.boss_poke_para.talent_value.def_,
                     raid_enemy_info.boss_poke_para.talent_value.spa,
                     raid_enemy_info.boss_poke_para.talent_value.spd,
-                    raid_enemy_info.boss_poke_para.talent_value.spe
+                    raid_enemy_info.boss_poke_para.talent_value.spe,
                 )
 
         match raid_enemy_info.boss_poke_para.tokusei:
@@ -269,14 +275,11 @@ class TeraRaid:
                 encounter_slot_rand -= table.raid_enemy_info.rate
 
     def __str__(self) -> str:
-        if not self.is_enabled:
-            return "Empty Den"
-        return f"{self.difficulty=!r} " \
-               f"{self.species=!r}{f'-{self.form}' if self.form else ''} " \
-               f"{self.area_id=} " \
-               f"{self.den_id=} " \
-               f"{self.is_shiny=} " \
-               f"{self.ivs=} "
+        return (
+            f"{self.difficulty:!r} {self.species:!r}{f'-{self.form}' if self.form else ''} {self.area_id:=} {self.den_id:=} {self.is_shiny:=} {self.ivs:=} "
+            if self.is_enabled
+            else "Empty Den"
+        )
 
 @dataclass
 class RaidBlock:

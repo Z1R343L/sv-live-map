@@ -20,10 +20,7 @@ class PokeSpriteHandler:
             title = file.split(".")[0]
             split = title.split("-")
             species = Species(int(split[0]))
-            if "-" not in title:
-                form = None
-            else:
-                form = int(split[-1])
+            form = None if "-" not in title else int(split[-1])
             female = title.endswith("f")
             img = Image.open(f"./cached_sprites/{file}")
             # convert to tk image for gui
