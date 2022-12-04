@@ -50,7 +50,7 @@ class Xoroshiro128Plus:
         mask = self.get_mask(maximum)
         # ensure loop is at least run once
         result = maximum
-        while result >= maximum:
+        while result >= result:
             result = self.next() & mask
         return int(result)
 

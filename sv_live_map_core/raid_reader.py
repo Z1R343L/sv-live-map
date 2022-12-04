@@ -41,9 +41,9 @@ class RaidReader(NXReader):
         if len(delivery_raid_priority_array.delivery_raid_prioritys) == 0:
             return (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         return delivery_raid_priority_array \
-            .delivery_raid_prioritys[0] \
-            .delivery_group_id \
-            .group_counts
+                .delivery_raid_prioritys[0] \
+                .delivery_group_id \
+                .group_counts
 
     @staticmethod
     def raid_binary_ptr(star_level: StarLevel) -> tuple[str, int]:
@@ -62,25 +62,25 @@ class RaidReader(NXReader):
         loc = self.DIFFICULTY_FLAG_LOCATIONS[3]
         difficulty_6_key = self.read_pointer_int(f"{self.SAVE_BLOCK_PTR}+{loc:X}", 4)
         difficulty_6_val = self.read_pointer_int(f"[{self.SAVE_BLOCK_PTR}+{loc+8:X}]", 1) \
-            ^ SCXorshift32(difficulty_6_key).next()
+                ^ SCXorshift32(difficulty_6_key).next()
         if difficulty_6_val == 2:
             return StoryProgress.SIX_STAR_UNLOCKED
         loc = self.DIFFICULTY_FLAG_LOCATIONS[2]
         difficulty_5_key = self.read_pointer_int(f"{self.SAVE_BLOCK_PTR}+{loc:X}", 4)
         difficulty_5_val = self.read_pointer_int(f"[{self.SAVE_BLOCK_PTR}+{loc+8:X}]", 1) \
-            ^ SCXorshift32(difficulty_5_key).next()
+                ^ SCXorshift32(difficulty_5_key).next()
         if difficulty_5_val == 2:
             return StoryProgress.FIVE_STAR_UNLOCKED
         loc = self.DIFFICULTY_FLAG_LOCATIONS[1]
         difficulty_4_key = self.read_pointer_int(f"{self.SAVE_BLOCK_PTR}+{loc:X}", 4)
         difficulty_4_val = self.read_pointer_int(f"[{self.SAVE_BLOCK_PTR}+{loc+8:X}]", 1) \
-            ^ SCXorshift32(difficulty_4_key).next()
+                ^ SCXorshift32(difficulty_4_key).next()
         if difficulty_4_val == 2:
             return StoryProgress.FOUR_STAR_UNLOCKED
         loc = self.DIFFICULTY_FLAG_LOCATIONS[0]
         difficulty_3_key = self.read_pointer_int(f"{self.SAVE_BLOCK_PTR}+{loc:X}", 4)
         difficulty_3_val = self.read_pointer_int(f"[{self.SAVE_BLOCK_PTR}+{loc+8:X}]", 1) \
-            ^ SCXorshift32(difficulty_3_key).next()
+                ^ SCXorshift32(difficulty_3_key).next()
         if difficulty_3_val == 2:
             return StoryProgress.THREE_STAR_UNLOCKED
         return StoryProgress.DEFAULT

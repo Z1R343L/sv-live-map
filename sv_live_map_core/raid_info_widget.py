@@ -45,15 +45,15 @@ class RaidInfoWidget(customtkinter.CTkFrame):
 
         # TODO: gender
         self.poke_sprite = \
-            self.poke_sprite_handler.grab_sprite(self.raid_data.species, self.raid_data.form, False)
+                self.poke_sprite_handler.grab_sprite(self.raid_data.species, self.raid_data.form, False)
         if RaidInfoWidget.TERA_SPRITES is None:
-            RaidInfoWidget.TERA_SPRITES = []
-            for tera_type in TeraType:
-                RaidInfoWidget.TERA_SPRITES.append(
-                    ImageTk.PhotoImage(
-                        Image.open(f"./resources/gem/{tera_type.name}.png")
-                    )
+            RaidInfoWidget.TERA_SPRITES = [
+                ImageTk.PhotoImage(
+                    Image.open(f"./resources/gem/{tera_type.name}.png")
                 )
+                for tera_type in TeraType
+            ]
+
         self.tera_sprite = RaidInfoWidget.TERA_SPRITES[raid_data.tera_type]
         if RaidInfoWidget.EMPTY_SPRITE is None:
             RaidInfoWidget.EMPTY_SPRITE = ImageTk.PhotoImage(
@@ -114,13 +114,13 @@ class RaidInfoWidget(customtkinter.CTkFrame):
         ec_str = f"{self.raid_data.encryption_constant:08X}"
         sidtid_str = f"{self.raid_data.sidtid:08X}"
         info_str = f"{species_str}{form_str}\n" \
-                   f"{shiny_str}{event_str}{star_str}\n" \
-                   f"IVs: {iv_str}\n" \
-                   f"Nature: {nature_str} Ability: {ability_str} Gender: {gender_str}\n" \
-                   f"Tera Type: {tera_type_str}\n" \
-                   f"Location: {location_str}\n" \
-                   f"Seed: {seed_str} EC: {ec_str}\n" \
-                   f"PID: {pid_str} SIDTID: {sidtid_str}\n"
+                       f"{shiny_str}{event_str}{star_str}\n" \
+                       f"IVs: {iv_str}\n" \
+                       f"Nature: {nature_str} Ability: {ability_str} Gender: {gender_str}\n" \
+                       f"Tera Type: {tera_type_str}\n" \
+                       f"Location: {location_str}\n" \
+                       f"Seed: {seed_str} EC: {ec_str}\n" \
+                       f"PID: {pid_str} SIDTID: {sidtid_str}\n"
 
         self.info_display = customtkinter.CTkLabel(
             master = self,
@@ -169,7 +169,6 @@ class RaidInfoWidget(customtkinter.CTkFrame):
                     width = 50,
                     command = self.swap_command
                 )
-                self.swap_location_button.pack(side = "left", padx = (0, 15))
             else:
                 # padding
                 self.swap_location_button = customtkinter.CTkLabel(
@@ -177,4 +176,5 @@ class RaidInfoWidget(customtkinter.CTkFrame):
                     text = "",
                     width = 50
                 )
-                self.swap_location_button.pack(side = "left", padx = (0, 15))
+
+            self.swap_location_button.pack(side = "left", padx = (0, 15))

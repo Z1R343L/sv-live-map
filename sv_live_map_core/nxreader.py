@@ -27,7 +27,7 @@ class NXReader:
 
     def recv(self, size):
         """Receive response from sys-botbase"""
-        return binascii.unhexlify(self.socket.recv(2 * size + 1)[0:-1])
+        return binascii.unhexlify(self.socket.recv(2 * size + 1)[:-1])
 
     def close(self):
         """Close connection to switch"""
@@ -73,8 +73,7 @@ class NXReader:
         """Read bytes from heap"""
         self.send_command(f'peek 0x{address:X} 0x{size:X}')
         sleep(size / 0x8000)
-        buf = self.recv(size)
-        return buf
+        return self.recv(size)
 
     def read_int(self, address, size):
         """Read integer from heap"""
@@ -84,8 +83,7 @@ class NXReader:
         """Read bytes from absolute address"""
         self.send_command(f'peekAbsolute 0x{address:X} 0x{size:X}')
         sleep(size / 0x8000)
-        buf = self.recv(size)
-        return buf
+        return self.recv(size)
 
     def read_absolute_int(self, address, size):
         """Read integer from absolute address"""
@@ -99,8 +97,7 @@ class NXReader:
         """Read bytes from main"""
         self.send_command(f'peekMain 0x{address:X} 0x{size:X}')
         sleep(size / 0x8000)
-        buf = self.recv(size)
-        return buf
+        return self.recv(size)
 
     def read_main_int(self, address, size):
         """Read integer from main"""
@@ -116,8 +113,7 @@ class NXReader:
         command = f'pointerPeek 0x{size:X} 0x{" 0x".join(jump.replace("+", "") for jump in jumps)}'
         self.send_command(command)
         sleep(size / 0x8000)
-        buf = self.recv(size)
-        return buf
+        return self.recv(size)
 
     def read_pointer_int(self, pointer, size):
         """Read integer from pointer"""

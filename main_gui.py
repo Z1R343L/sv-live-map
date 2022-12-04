@@ -183,7 +183,7 @@ class Application(customtkinter.CTk):
         for level in StarLevel:
             with open(f"./cached_tables/{level.name}.pkl", "wb+") as file:
                 index = level
-                if level == StarLevel.EVENT:
+                if index == StarLevel.EVENT:
                     index = -1
                 pickle.dump(self.reader.raid_enemy_table_arrays[index], file)
 
@@ -192,21 +192,20 @@ class Application(customtkinter.CTk):
         try:
             if self.use_cached_tables.get():
                 cached_tables = self.read_cached_tables()
-                if cached_tables is not None:
-                    self.reader = RaidReader(
-                        self.ip_entry.get(),
-                        read_safety = False,
-                        raid_enemy_table_arrays = cached_tables
-                    )
-                    if len(self.reader.raid_enemy_table_arrays[0].raid_enemy_tables) == 0:
-                        self.reader = None
-                        self.error_message_window(
-                            "Invalid",
-                            "Cached raid data is invalid. " \
+                if cached_tables is None:
+                    return False
+                self.reader = RaidReader(
+                    self.ip_entry.get(),
+                    read_safety = False,
+                    raid_enemy_table_arrays = cached_tables
+                )
+                if len(self.reader.raid_enemy_table_arrays[0].raid_enemy_tables) == 0:
+                    self.reader = None
+                    self.error_message_window(
+                        "Invalid",
+                        "Cached raid data is invalid. " \
                             "Ensure the game is loaded in when reading."
-                        )
-                        return False
-                else:
+                    )
                     return False
             else:
                 self.reader = RaidReader(self.ip_entry.get(), read_safety = True)
@@ -232,9 +231,8 @@ class Application(customtkinter.CTk):
             self.reader.close()
             self.reader = None
             self.connect_button.configure(text = "Connect")
-        else:
-            if self.connect():
-                self.connect_button.configure(text = "Disconnect")
+        elif self.connect():
+            self.connect_button.configure(text = "Disconnect")
 
     def read_all_raids(self):
         """Read and display all raid information"""
@@ -288,10 +286,10 @@ class Application(customtkinter.CTk):
             if raid.id_str.endswith("_"):
                 other_id_str = raid.id_str[:-1]
             else:
-                other_id_str = raid.id_str + "_"
+                other_id_str = f"{raid.id_str}_"
             # position has not been changed
             if self.raid_markers[raid.id_str].position \
-              == self.map_widget.game_coordinates_to_deg(*self.den_locations[raid.id_str]):
+                  == self.map_widget.game_coordinates_to_deg(*self.den_locations[raid.id_str]):
                 # swap the positions of the two markers
                 self.raid_markers[raid.id_str].set_position(
                     *self.map_widget.game_coordinates_to_deg(*self.den_locations[other_id_str])
@@ -321,8 +319,11 @@ class Application(customtkinter.CTk):
                     print(f"WARNING duplicate raid id {raid.id_str} is treated as {raid.id_str}_")
                     raid.id_str += "_"
 
-                has_alternate_location = raid.id_str.endswith("_") \
-                    or (raid.id_str + "_") in self.den_locations
+                has_alternate_location = (
+                    raid.id_str.endswith("_")
+                    or f"{raid.id_str}_" in self.den_locations
+                )
+
 
                 info_widget = RaidInfoWidget(
                     master = self.info_frame.scrollable_frame,
@@ -383,13 +384,12 @@ class Application(customtkinter.CTk):
             self.after_cancel(self.background_workers['position']['worker'])
             self.background_workers['position']['active'] = False
             self.position_button.configure(text = "Track Player")
+        elif self.reader:
+            self.position_button.configure(text = "Stop Tracking Player")
+            self.background_workers['position']['active'] = True
+            self.after(1000, self.position_work)
         else:
-            if self.reader:
-                self.position_button.configure(text = "Stop Tracking Player")
-                self.background_workers['position']['active'] = True
-                self.after(1000, self.position_work)
-            else:
-                self.error_message_window("Invalid", "Not connected to switch.")
+            self.error_message_window("Invalid", "Not connected to switch.")
 
     def position_work(self):
         """Work to be done to update the player's position"""
@@ -397,7 +397,7 @@ class Application(customtkinter.CTk):
             try:
                 # omit Y (height) coordinate
                 game_x, _, game_z = \
-                    struct.unpack("fff", self.reader.read_main(self.PLAYER_POS_ADDRESS, 12))
+                        struct.unpack("fff", self.reader.read_main(self.PLAYER_POS_ADDRESS, 12))
             # struct.error/binascii.Error when connection terminates before all 12 bytes are read
             except (TimeoutError, struct.error, binascii.Error):
                 self.toggle_connection()
@@ -410,7 +410,7 @@ class Application(customtkinter.CTk):
             pos_x, pos_y = self.map_widget.game_coordinates_to_deg(game_x, _, game_z)
             if 'marker' not in self.background_workers['position']:
                 self.background_workers['position']['marker'] = \
-                    self.map_widget.set_marker(pos_x, pos_y, "PLAYER")
+                        self.map_widget.set_marker(pos_x, pos_y, "PLAYER")
             else:
                 self.background_workers['position']['marker'].set_position(pos_x, pos_y)
 
